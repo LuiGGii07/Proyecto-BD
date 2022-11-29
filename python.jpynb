@@ -1,0 +1,54 @@
+import numpy as np
+import random
+import spark
+import findspark
+from pyspark.sql import SparkSession
+
+findspark.init() 
+spark = SparkSession.builder.appName("Test_spark").master("local[*]").getOrCreate()
+spark
+
+df = spark.read.csv('/content/drive/MyDrive/mexico.csv', sep=',', header=True)
+df.createOrReplaceTempView ('registros')
+
+#Mensaje Inicial
+print('Hola, aquí es posible hacer consultas sobre:')
+print('Top 5 Estados con mayor indice de delincuencia (1)')
+print('Indice de delincuencia de un estado de interes un año de interes (2)')
+print('Indice de delincuencia de un estado de interes todos los años registrados (3)')
+print('Consultar los 32 registros completos de los estados (4)')
+consulta = input()
+
+#Ciclo donde se ejecuta el programa
+while not consulta == "salir":
+    if consulta != "salir" :
+      if consulta == 1:
+        print("Indica el año que deseas consultar")
+        año = input()
+        año = "Reporte_" + año
+        print("Top 5 Estados con mayor indice de delincuencia")
+        spark.sql(f"""SELECT * FROM Mexico ORDER BY '{año}' desc limit 5""").show(5, truncate=False)
+      if consulta == 2 :
+        print("Indica el estado que deseas consultar")
+        estado = input()
+        print("Indica el año que deseas consultar")
+        año = input()
+        año = "Reporte_" + año
+        print("Indice de delincuencia de un estado de interes un año de interes")
+        spark.sql(f"""SELECT Entidad, '{año}'  FROM Mexico Where Entidad = '{estado}' """).show(1, truncate=False)
+      if consulta == 3 :
+        print("Indica el estado que deseas consultar")
+        estado = input()
+        año = "Reporte_" + año
+        print("Indice de delincuencia de un estado de interes todos los años registrados")
+        spark.sql(f"""SELECT * FROM Mexico Where Entidad = '{estado}' """).show(1, truncate=False)
+      if consulta == 4 :
+        print("Consultar los 32 registros completos de los estados (4)")
+        spark.sql(f"""SELECT * FROM Mexico """).show(32, truncate=False)  
+    print('Hola, aquí es posible hacer consultas sobre:')
+    print('Top 5 Estados con mayor indice de delincuencia (1)')
+    print('Indice de delincuencia de un estado de interes un año de interes (2)')
+    print('Indice de delincuencia de un estado de interes todos los años registrados (3)')
+    print('Consultar los 32 registros completos de los estados (4)')
+    print('o escribe salir')
+    consulta = input()
